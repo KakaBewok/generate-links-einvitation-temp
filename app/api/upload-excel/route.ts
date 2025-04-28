@@ -2,12 +2,16 @@ import supabase from "@/config/supabase-config";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
+// disable automatic body parsing for this route
+// because we are using formData to upload a file
 export const config = {
   api: {
-    bodyParser: false, // Disable Next.js body parser untuk file upload
+    bodyParser: false,
   },
 };
 
+// Define the interface for the guest data
+// that will be extracted from the Excel file
 interface GuestData {
   id: string;
   name: string;
@@ -16,6 +20,51 @@ interface GuestData {
   invitation_id: string;
 }
 
+// --- Helper functions ---
+async function parseExcelFile(file: File): Promise<GuestData[]> {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  const data = XLSX.utils.sheet_to_json<GuestData>(sheet);
+  return data;
+}
+
+// Function to validate the guest data
+// to ensure all required fields are present
+function validateGuestData(item: GuestData): boolean {
+  return !!(
+    item.invitation_id &&
+    item.name &&
+    item.phone_number &&
+    item.address
+  );
+}
+
+async function findInvitationId(invitationId: string): Promise<string> {
+  const { data, error } = await supabase
+    .from("invitations")
+    .select("id")
+    .eq("id", invitationId)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Invitation not found for id: ${invitationId}`);
+  }
+
+  return data.id;
+}
+
+//sampe sini
+const upsertGuestsToDB = async (guests: any[]) => {
+  const { data, error } = await supabase.from("guests").upsert(guests);
+  if (error) {
+    throw new Error(error.message || "Error saving guest data to database");
+  }
+  return data;
+};
+
+// --- Main Handler ---
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -28,61 +77,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
-
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json<GuestData>(sheet);
+    const data = await parseExcelFile(file);
     console.log("Parsed Excel Data:", data);
 
     const guests = [];
 
     for (const item of data) {
-      if (
-        !item["invitation_id"] ||
-        !item["name"] ||
-        !item["phone_number"] ||
-        !item["address"]
-      ) {
+      if (!validateGuestData(item)) {
         continue;
       }
 
-      const { data: invitationData, error: invitationError } = await supabase
-        .from("invitations")
-        .select("id")
-        .eq("id", item["invitation_id"])
-        .single();
-
-      if (invitationError) {
-        return NextResponse.json(
-          {
-            error: "Invitation not found for id: " + item["invitation_id"],
-          },
-          { status: 400 }
-        );
-      }
+      const invitationId = await findInvitationId(item.invitation_id);
 
       guests.push({
-        guest_name: item["name"],
-        phone_number: item["phone_number"],
-        address: item["address"],
-        invitation_id: invitationData.id,
+        guest_name: item.name,
+        phone_number: item.phone_number,
+        address: item.address,
+        invitation_id: invitationId,
       });
     }
 
-    // Menyimpan data tamu ke tabel guests
-    const { data: insertedGuests, error: guestError } = await supabase
-      .from("guests")
-      .upsert(guests);
-
-    if (guestError) {
-      console.error("Supabase upsert error:", guestError);
-      return NextResponse.json(
-        { error: guestError.message || "Error saving guest data to database" },
-        { status: 500 }
-      );
-    }
+    const insertedGuests = await upsertGuestsToDB(guests);
 
     console.log("Results Excel Data:", insertedGuests);
 
@@ -90,9 +105,10 @@ export async function POST(request: NextRequest) {
       message: "File uploaded and guest data saved successfully",
       data: insertedGuests,
     });
-  } catch (err) {
+  } catch (err: any) {
+    console.error("Error processing file:", err.message);
     return NextResponse.json(
-      { error: "Error processing file" },
+      { error: err.message || "Error processing file" },
       { status: 500 }
     );
   }
