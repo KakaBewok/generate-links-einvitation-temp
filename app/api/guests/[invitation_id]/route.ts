@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { invitation_id: string } }
+  context: { params: { invitation_id: string } }
+  // { params }: { params: { invitation_id: string } }
 ) {
-  const { invitation_id } = await params;
+  const { invitation_id } = await context.params;
 
   try {
     const { data, error } = await supabase
