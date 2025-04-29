@@ -1,20 +1,24 @@
 "use client";
 
+import { FileUpload } from "@/components/ui/file-upload";
 import { useState } from "react";
 
 export default function UploadGuestPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
+  const handleFileChange = (files: File[]) => {
+    const selectedFile = files[0] || null;
     setFile(selectedFile);
   };
 
   const handleUpload = async () => {
     if (!file) {
-      setMessage("Please select a file first.");
+      setMessage("Please upload the file!");
+      setTimeout(() => {
+        setMessage("");
+      }, 3000);
       return;
     }
 
@@ -34,6 +38,10 @@ export default function UploadGuestPage() {
 
       if (response.ok) {
         setMessage("File uploaded successfully!");
+        setTimeout(() => {
+          setMessage("");
+        }, 5000);
+        setFile(null);
       } else {
         setMessage(result.error || "Upload failed.");
       }
@@ -46,28 +54,21 @@ export default function UploadGuestPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          Upload Guest Excel
-        </h1>
-
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleFileChange}
-          className="mb-4 w-full"
-        />
-
+    <div className="w-full px-3 md:px-0">
+      <div className="px-5 py-4 mt-20 w-full max-w-3xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-500 dark:border-neutral-800 rounded-lg">
+        <FileUpload onChange={handleFileChange} files={file ? [file] : []} />
         <button
           onClick={handleUpload}
           disabled={isUploading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-blue-300"
+          className="mb-3 w-full bg-neutral-600 text-neutral-100 py-2 rounded-sm hover:bg-neutral-700 transition-colors duration-200 disabled:bg-neutral-500 cursor-pointer"
         >
           {isUploading ? "Uploading..." : "Upload"}
         </button>
-
-        {message && <p className="mt-4 text-center text-gray-700">{message}</p>}
+        {message && (
+          <p className="my-6 text-center text-neutral-700 font-semibold">
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );

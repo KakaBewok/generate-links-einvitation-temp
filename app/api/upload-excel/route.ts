@@ -1,5 +1,5 @@
-import { GuestData } from "@/app/(types)/guest-data";
 import supabase from "@/config/supabase-config";
+import { GuestData } from "@/types/guest-data";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
@@ -24,12 +24,7 @@ async function parseExcelFile(file: File): Promise<GuestData[]> {
 // Function to validate the guest data
 // to ensure all required fields are present
 function validateGuestData(item: GuestData): boolean {
-  return !!(
-    item.invitation_id &&
-    item.guest_name &&
-    item.phone_number &&
-    item.address
-  );
+  return !!(item.invitation_id && item.guest_name);
 }
 
 async function findInvitationId(invitationId: string): Promise<string> {

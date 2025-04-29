@@ -1,4 +1,3 @@
-import { GuestData } from "@/app/(types)/guest-data";
 import supabase from "@/config/supabase-config";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -62,7 +61,7 @@ ${link}
 
 Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir di acara kami
 Mohon maaf perihal undangan hanya dibagikan melalui pesan ini
-Terima kasih banyak atas perhatiannya
+Terima kasih banyak atas perhatiannya.
 
 catatan:
 Untuk mendapatkan hasil yang lebih baik, harap buka melalui browser Google Chrome terbaru dan matikan mode gelap dari smartphone.

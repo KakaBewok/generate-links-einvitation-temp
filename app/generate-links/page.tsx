@@ -1,14 +1,40 @@
 "use client";
 
+import { Meteors } from "@/components/ui/meteors";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Check, ClipboardCopy } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const InvitationLinkGenerator: React.FC = () => {
   const [invitations, setInvitations] = useState<any[]>([]);
   const [guests, setGuests] = useState<any[]>([]);
   const [selectedInvitation, setSelectedInvitation] = useState<string>("");
-  const [generatedLinks, setGeneratedLinks] = useState<any[]>([]);
+  const [generatedMessages, setGeneratedMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [copySuccess, setCopySuccess] = useState<string>("");
+  const [domLoaded, setDomLoaded] = useState<boolean>(false);
+  const [copied, setCopied] = useState(false);
+  const [indexCopied, setIndexCopied] = useState<number | null>(null);
+
+  const handleCopy = (template: string, index: number) => {
+    copyToClipboard(template);
+    setIndexCopied(index);
+    setCopied(true);
+
+    // Reset icon setelah 3 detik
+    setTimeout(() => {
+      setIndexCopied(null);
+    }, 3000);
+
+    setTimeout(() => setCopied(false), 1500); // Reset after 1.5s
+  };
 
   useEffect(() => {
     const fetchInvitations = async () => {
@@ -25,6 +51,8 @@ const InvitationLinkGenerator: React.FC = () => {
       }
     };
     fetchInvitations();
+
+    setDomLoaded(true);
   }, []);
 
   console.log("state guests: ", guests);
@@ -66,7 +94,7 @@ const InvitationLinkGenerator: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         console.log("ini response gen links", result.data);
-        setGeneratedLinks(result.data);
+        setGeneratedMessages(result.data);
       } else {
         console.error("Error generating links");
       }
@@ -84,68 +112,117 @@ const InvitationLinkGenerator: React.FC = () => {
     );
   };
 
-  console.log(generatedLinks.length);
-
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-xl font-semibold mb-4">Generate Invitation Links</h2>
+    <div className="max-w-3xl py-12 px-3 mx-auto">
+      <div className="mx-auto relative w-full max-w-xl">
+        <div className="absolute inset-0 h-full w-full scale-[0.80] transform rounded-full bg-red-500 bg-gradient-to-r from-blue-500 to-teal-500 blur-2xl" />
+        <div className="relative flex h-full flex-col items-start justify-end overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 px-4 py-8 shadow-xl">
+          <h1 className="relative z-50 mb-4 text-xl font-bold text-white">
+            Generate Invitation Messages
+          </h1>
 
-      <div className="mb-4">
-        <label htmlFor="invitationSelect" className="block text-gray-700">
-          Select Invitation
-        </label>
-        <select
-          id="invitationSelect"
-          value={selectedInvitation}
-          onChange={(e) => handleInvitationChange(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md mt-2"
-        >
-          <option value="">-- Select Invitation --</option>
-          {invitations.map((invitation) => (
-            <option key={invitation.id} value={invitation.id}>
-              {invitation.event_name} ({invitation.event_date})
-            </option>
-          ))}
-        </select>
+          <div className="mb-5 w-full text-white bg-slate-800">
+            <Select
+              value={selectedInvitation ?? ""}
+              onValueChange={handleInvitationChange}
+            >
+              <SelectTrigger className="w-full ">
+                <SelectValue placeholder="Select Invitation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="kkh">Select Invitation</SelectItem>
+                  {invitations.map((invitation) => (
+                    <SelectItem key={invitation.id} value={invitation.id}>
+                      {invitation.event_name} ({invitation.event_date})
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <button
+            onClick={generateLinks}
+            className="bg-sky-600 hover:bg-sky-700 transition-colors duration-300 cursor-pointer text-white p-2 rounded-md w-full"
+            disabled={!selectedInvitation}
+          >
+            {loading ? "Loading..." : "Generate Messages"}
+          </button>
+
+          {domLoaded && <Meteors number={30} />}
+        </div>
       </div>
 
-      {loading ? (
-        <p>Loading guests...</p>
-      ) : (
-        <button
-          onClick={generateLinks}
-          className="bg-blue-500 text-white p-2 rounded-md"
-          disabled={!selectedInvitation}
-        >
-          Generate Links
-        </button>
-      )}
-
       <div className="mt-6">
-        {copySuccess && <p className="text-green-500">{copySuccess}</p>}
+        {generatedMessages.length > 0 && (
+          <div className="mx-auto relative w-full max-w-xl ">
+            <div className="absolute inset-0 h-full w-full scale-[0.80] transform rounded-full bg-red-500 bg-gradient-to-r from-blue-500 to-teal-500 blur-3xl" />
+            <div className="relative flex h-full flex-col items-start justify-end overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 px-4 py-8 shadow-xl">
+              <h1 className="relative z-50 mb-1 text-xl font-bold text-white">
+                Your Invitation Messages! 💕
+              </h1>
+              <p className="text-slate-400 text-xs mb-10">
+                This list of invitation messages is temporary, if the browser is
+                reloaded or refreshed, the data will be lost and must be
+                regenerated.
+              </p>
 
-        {generatedLinks.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold">Generated Links:</h3>
-            <ul className="space-y-2 mt-4">
-              {generatedLinks.map((link, index) => (
-                <li
-                  key={index}
-                  className="bg-yellow-400 flex justify-between items-center"
-                >
-                  <div className="flex space-x-2">
-                    {link.to}
+              <ul className="w-full flex flex-col gap-4">
+                {generatedMessages.map((link, index) => (
+                  <li
+                    key={index}
+                    className="hover:bg-sky-200 cursor-pointer flex justify-between items-center bg-white dark:bg-slate-800 shadow-md rounded-lg p-4 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <div className="flex gap-2 items-center">
+                      <span>{index + 1}. </span>
+                      <div className="text-sm text-gray-700 dark:text-gray-100 font-semibold">
+                        <span className="font-semibold">To:</span> {link.to}
+                      </div>
+                    </div>
+
                     <button
-                      onClick={() => copyToClipboard(link.template)}
-                      className="text-sm text-white bg-green-500 p-1 rounded-md"
+                      onClick={() => handleCopy(link.template, index)}
+                      className={`cursor-pointer ml-4 p-2 rounded-md transition-colors duration-200 ${
+                        indexCopied == index
+                          ? "bg-emerald-500 text-white"
+                          : "bg-gray-200  dark:bg-gray-700 "
+                      }`}
                     >
-                      Copy
+                      {indexCopied == index ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <ClipboardCopy className="w-4 h-4" />
+                      )}
                     </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+
+              {domLoaded && <Meteors number={30} />}
+            </div>
           </div>
+          // <div>
+          //   <h3 className="text-lg font-semibold">Generated Links:</h3>
+          //   <ul className="space-y-2 mt-4">
+          //     {generatedMessages.map((link, index) => (
+          //       <li
+          //         key={index}
+          //         className="bg-yellow-400 flex justify-between items-center"
+          //       >
+          //         <div className="flex space-x-2">
+          //           {link.to}
+          //           <button
+          //             onClick={() => copyToClipboard(link.template)}
+          //             className="text-sm text-white bg-green-500 p-1 rounded-md"
+          //           >
+          //             Copy
+          //           </button>
+          //         </div>
+          //       </li>
+          //     ))}
+          //   </ul>
+          // </div>
         )}
       </div>
     </div>
