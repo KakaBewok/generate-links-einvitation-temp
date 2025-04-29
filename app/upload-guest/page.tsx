@@ -1,6 +1,7 @@
 "use client";
 
 import { FileUpload } from "@/components/ui/file-upload";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function UploadGuestPage() {
@@ -55,7 +56,21 @@ export default function UploadGuestPage() {
 
   return (
     <div className="w-full px-3 md:px-0">
-      <div className="px-5 py-4 mt-20 w-full max-w-3xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-500 dark:border-neutral-800 rounded-lg">
+      <div className=" mt-20 flex justify-between gap-4 mb-4 mx-auto max-w-3xl">
+        <Link
+          href="/"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition"
+        >
+          ⬅️ Home
+        </Link>
+        <Link
+          href="/generate-links"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition"
+        >
+          ⬅️ Generate Invitation
+        </Link>
+      </div>
+      <div className="px-5 py-4 w-full max-w-3xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-500 dark:border-neutral-800 rounded-lg">
         <FileUpload onChange={handleFileChange} files={file ? [file] : []} />
         <button
           onClick={handleUpload}

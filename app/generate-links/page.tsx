@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Check, ClipboardCopy } from "lucide-react";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const InvitationLinkGenerator: React.FC = () => {
@@ -54,8 +55,6 @@ const InvitationLinkGenerator: React.FC = () => {
 
     setDomLoaded(true);
   }, []);
-
-  console.log("state guests: ", guests);
 
   const handleInvitationChange = async (invitationId: string) => {
     setSelectedInvitation(invitationId);
@@ -114,6 +113,20 @@ const InvitationLinkGenerator: React.FC = () => {
 
   return (
     <div className="max-w-3xl py-12 px-3 mx-auto">
+      <div className="flex justify-between gap-4 mb-4 max-w-xl mx-auto">
+        <Link
+          href="/"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition"
+        >
+          ⬅️ Home
+        </Link>
+        <Link
+          href="/upload-guest"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition"
+        >
+          ⬅️ Upload Guest List
+        </Link>
+      </div>
       <div className="mx-auto relative w-full max-w-xl">
         <div className="absolute inset-0 h-full w-full scale-[0.80] transform rounded-full bg-red-500 bg-gradient-to-r from-blue-500 to-teal-500 blur-2xl" />
         <div className="relative flex h-full flex-col items-start justify-end overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 px-4 py-8 shadow-xl">
@@ -202,27 +215,6 @@ const InvitationLinkGenerator: React.FC = () => {
               {domLoaded && <Meteors number={30} />}
             </div>
           </div>
-          // <div>
-          //   <h3 className="text-lg font-semibold">Generated Links:</h3>
-          //   <ul className="space-y-2 mt-4">
-          //     {generatedMessages.map((link, index) => (
-          //       <li
-          //         key={index}
-          //         className="bg-yellow-400 flex justify-between items-center"
-          //       >
-          //         <div className="flex space-x-2">
-          //           {link.to}
-          //           <button
-          //             onClick={() => copyToClipboard(link.template)}
-          //             className="text-sm text-white bg-green-500 p-1 rounded-md"
-          //           >
-          //             Copy
-          //           </button>
-          //         </div>
-          //       </li>
-          //     ))}
-          //   </ul>
-          // </div>
         )}
       </div>
     </div>
