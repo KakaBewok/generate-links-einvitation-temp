@@ -1,3 +1,4 @@
+import { GuestData } from "@/app/(types)/guest-data";
 import supabase from "@/config/supabase-config";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
@@ -9,16 +10,6 @@ export const config = {
     bodyParser: false,
   },
 };
-
-// Define the interface for the guest data
-// that will be extracted from the Excel file
-interface GuestData {
-  id: string;
-  name: string;
-  phone_number: string;
-  address: string;
-  invitation_id: string;
-}
 
 // --- Helper functions ---
 async function parseExcelFile(file: File): Promise<GuestData[]> {
@@ -35,7 +26,7 @@ async function parseExcelFile(file: File): Promise<GuestData[]> {
 function validateGuestData(item: GuestData): boolean {
   return !!(
     item.invitation_id &&
-    item.name &&
+    item.guest_name &&
     item.phone_number &&
     item.address
   );
@@ -55,10 +46,11 @@ async function findInvitationId(invitationId: string): Promise<string> {
   return data.id;
 }
 
-//sampe sini
-const upsertGuestsToDB = async (guests: any[]) => {
+// Function to upsert guest data into the database
+const upsertGuestsToDB = async (guests: GuestData[]) => {
   const { data, error } = await supabase.from("guests").upsert(guests);
   if (error) {
+    console.error("Error saving guest data to database:", error.message);
     throw new Error(error.message || "Error saving guest data to database");
   }
   return data;
@@ -80,7 +72,7 @@ export async function POST(request: NextRequest) {
     const data = await parseExcelFile(file);
     console.log("Parsed Excel Data:", data);
 
-    const guests = [];
+    const guests: GuestData[] = [];
 
     for (const item of data) {
       if (!validateGuestData(item)) {
@@ -90,7 +82,7 @@ export async function POST(request: NextRequest) {
       const invitationId = await findInvitationId(item.invitation_id);
 
       guests.push({
-        guest_name: item.name,
+        guest_name: item.guest_name,
         phone_number: item.phone_number,
         address: item.address,
         invitation_id: invitationId,
@@ -98,8 +90,6 @@ export async function POST(request: NextRequest) {
     }
 
     const insertedGuests = await upsertGuestsToDB(guests);
-
-    console.log("Results Excel Data:", insertedGuests);
 
     return NextResponse.json({
       message: "File uploaded and guest data saved successfully",

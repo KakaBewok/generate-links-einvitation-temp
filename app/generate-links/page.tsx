@@ -60,14 +60,13 @@ const InvitationLinkGenerator: React.FC = () => {
 
         body: JSON.stringify({
           invitation_id: selectedInvitation,
-          //   guests,
         }),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log("ini response gen links", data.templates);
-        setGeneratedLinks(data.templates);
+        const result = await response.json();
+        console.log("ini response gen links", result.data);
+        setGeneratedLinks(result.data);
       } else {
         console.error("Error generating links");
       }
@@ -80,7 +79,7 @@ const InvitationLinkGenerator: React.FC = () => {
 
   const copyToClipboard = (link: string) => {
     navigator.clipboard.writeText(link).then(
-      () => setCopySuccess("Link copied!"),
+      () => setCopySuccess("Copied!"),
       () => setCopySuccess("Failed to copy link")
     );
   };
@@ -134,19 +133,10 @@ const InvitationLinkGenerator: React.FC = () => {
                   key={index}
                   className="bg-yellow-400 flex justify-between items-center"
                 >
-                  {/* <span>{link.name}</span> */}
                   <div className="flex space-x-2">
-                    {/* <a
-                      href={link.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline"
-                    >
-                      {link.link}
-                    </a> */}
-                    {link}
+                    {link.to}
                     <button
-                      onClick={() => copyToClipboard(link)}
+                      onClick={() => copyToClipboard(link.template)}
                       className="text-sm text-white bg-green-500 p-1 rounded-md"
                     >
                       Copy

@@ -17,4 +17,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-// return NextResponse.json({ error: "Invitation not found" }, { status: 404 });

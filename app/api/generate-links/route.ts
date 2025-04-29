@@ -1,3 +1,4 @@
+import { GuestData } from "@/app/(types)/guest-data";
 import supabase from "@/config/supabase-config";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,22 +39,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const templates = guestsData.map((guest) => {
-      const link = `${invitationData.web_url}?to=${guest.guest_name}`;
+    const results = guestsData.map((guest) => {
+      const sanitizedGuestName = encodeURIComponent(guest.guest_name);
+      const link = `${invitationData.web_url}?to=${sanitizedGuestName}`;
 
-      return `
+      const template = `
 Yth. Bapak/Ibu/Saudara/i
 ${guest.guest_name}
 di Tempat
 
 Dengan segala kerendahan hati, kami mengundang Bapak/Ibu/Saudara/i dan teman-teman untuk menghadiri acara,
 
-${invitationData.event_title}
+${invitationData.event_name}
 
 Pada:
 🗓️ Tanggal: ${formatDate(invitationData.event_date)}
-🕛 Pukul: ${invitationData.event_time}
-📍 Lokasi: ${invitationData.event_location}
+🕛 Pukul: ${formatTime(invitationData.event_time)} WIB s/d selesai
+📍 Lokasi: ${invitationData.location}
 
 Link undangan bisa diakses lengkap di:
 ${link}
@@ -62,14 +64,18 @@ Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk
 Mohon maaf perihal undangan hanya dibagikan melalui pesan ini
 Terima kasih banyak atas perhatiannya
 
-Note:
-Untuk mendapatkan hasil yg bagus, harap buka melalui Google Chrome terupdate dan matikan mode gelap dari hp
-      `.trim();
+catatan:
+Untuk mendapatkan hasil yang lebih baik, harap buka melalui browser Google Chrome terbaru dan matikan mode gelap dari smartphone.
+                          `;
+      return {
+        to: guest.guest_name,
+        template: template.trim(),
+      };
     });
 
     return NextResponse.json({
       message: "Templates generated successfully",
-      templates,
+      data: results,
     });
   } catch (error) {
     console.error("Generate templates error:", error);
@@ -78,6 +84,15 @@ Untuk mendapatkan hasil yg bagus, harap buka melalui Google Chrome terupdate dan
 }
 
 function formatDate(dateString: string): string {
-  const [year, month, day] = dateString.split("-");
-  return `${day}-${month}-${year}`;
+  const date = new Date(dateString);
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatTime(timeString: string): string {
+  const [hours, minutes] = timeString.split(":");
+  return `${hours}:${minutes}`;
 }

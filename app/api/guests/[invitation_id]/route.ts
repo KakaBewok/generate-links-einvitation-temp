@@ -6,7 +6,6 @@ export async function GET(
   { params }: { params: { invitation_id: string } }
 ) {
   const { invitation_id } = await params;
-  console.log("inv id dari api: ", invitation_id);
 
   try {
     const { data, error } = await supabase
@@ -15,7 +14,6 @@ export async function GET(
       .eq("invitation_id", invitation_id);
 
     if (error) {
-      // return NextResponse.json({ error: error.message });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
