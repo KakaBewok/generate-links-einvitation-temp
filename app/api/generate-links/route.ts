@@ -1,4 +1,4 @@
-import supabase from "@/config/supabase-config";
+import db from "@/config/db-config";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: invitationData, error: invitationError } = await supabase
+    const { data: invitationData, error: invitationError } = await db
       .from("invitations")
       .select("*")
       .eq("id", invitation_id)
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: guestsData, error: guestsError } = await supabase
+    const { data: guestsData, error: guestsError } = await db
       .from("guests")
       .select("id, guest_name")
       .eq("invitation_id", invitation_id);

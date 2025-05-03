@@ -1,4 +1,4 @@
-import supabase from "@/config/supabase-config";
+import db from "@/config/db-config";
 import { GuestData } from "@/types/guest-data";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
@@ -28,7 +28,7 @@ function validateGuestData(item: GuestData): boolean {
 }
 
 async function findInvitationId(invitationId: string): Promise<string> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("invitations")
     .select("id")
     .eq("id", invitationId)
@@ -43,7 +43,7 @@ async function findInvitationId(invitationId: string): Promise<string> {
 
 // Function to upsert guest data into the database
 const upsertGuestsToDB = async (guests: GuestData[]) => {
-  const { data, error } = await supabase.from("guests").upsert(guests);
+  const { data, error } = await db.from("guests").upsert(guests);
   if (error) {
     console.error("Error saving guest data to database:", error.message);
     throw new Error(error.message || "Error saving guest data to database");
