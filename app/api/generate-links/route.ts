@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         /%20/g,
         "+"
       );
-      const link = `${data.web_url}?to=${sanitizedGuestName}`;
+      const link = `${data.web_url}${data.slug}?to=${sanitizedGuestName}`;
 
       const template = `
 Yth. Bapak/Ibu/Saudara/i
