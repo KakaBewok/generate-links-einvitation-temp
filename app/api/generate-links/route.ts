@@ -1,4 +1,6 @@
 import db from "@/config/db-config";
+import { formatDate, formatTime } from "@/lib/utils";
+import Data from "@/types/data";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -15,7 +17,20 @@ export async function POST(request: NextRequest) {
 
     const { data: invitationData, error: invitationError } = await db
       .from("invitations")
-      .select("*")
+      .select(
+        `
+        *,
+        themes (*),
+        music (*),
+        videos (*),
+        images (*),
+        gift_infos (*),
+        rundowns (*),
+        guests (*),
+        stories (*),
+        rsvps (*)
+      `
+      )
       .eq("id", invitation_id)
       .single();
 
@@ -26,35 +41,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: guestsData, error: guestsError } = await db
-      .from("guests")
-      .select("id, guest_name")
-      .eq("invitation_id", invitation_id);
-
-    if (guestsError || !guestsData || guestsData.length === 0) {
-      return NextResponse.json(
-        { error: "No guests found for this invitation" },
-        { status: 404 }
+    const data: Data = invitationData;
+    const results = data?.guests?.map((guest) => {
+      const sanitizedGuestName = encodeURIComponent(guest.name).replace(
+        /%20/g,
+        "+"
       );
-    }
-
-    const results = guestsData.map((guest) => {
-      const sanitizedGuestName = encodeURIComponent(guest.guest_name);
-      const link = `${invitationData.web_url}?to=${sanitizedGuestName}`;
+      const link = `${data.web_url}?to=${sanitizedGuestName}`;
 
       const template = `
 Yth. Bapak/Ibu/Saudara/i
-${guest.guest_name}
+${guest.name}
 di Tempat
 
 Dengan segala kerendahan hati, kami mengundang Bapak/Ibu/Saudara/i dan teman-teman untuk menghadiri acara,
 
-${invitationData.event_name}
+${data.event_title}
 
 Pada:
-🗓️ Tanggal: ${formatDate(invitationData.event_date)}
-🕛 Pukul: ${formatTime(invitationData.event_time)} WIB s/d selesai
-📍 Lokasi: ${invitationData.location}
+🗓️ Tanggal: ${formatDate(data.event_date)}
+🕛 Pukul: ${formatTime(data.rundowns?.[0].start_time || null)} ${
+        data.rundowns?.[0].time_zone
+      } s/d selesai
+📍 Lokasi: ${data.rundowns?.[0].location}
 
 Link undangan bisa diakses lengkap di:
 ${link}
@@ -67,7 +76,7 @@ catatan:
 Untuk mendapatkan hasil yang lebih baik, harap buka melalui browser Google Chrome terbaru dan matikan mode gelap dari smartphone.
                           `;
       return {
-        to: guest.guest_name,
+        to: guest.name,
         template: template.trim(),
       };
     });
@@ -80,18 +89,4 @@ Untuk mendapatkan hasil yang lebih baik, harap buka melalui browser Google Chrom
     console.error("Generate templates error:", error);
     return NextResponse.json({ error: error }, { status: 500 });
   }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function formatTime(timeString: string): string {
-  const [hours, minutes] = timeString.split(":");
-  return `${hours}:${minutes}`;
 }

@@ -1,6 +1,25 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
+}
+
+export const formatDate = (date: string | null) => {
+  if (!date) return null;
+
+  const formattedDate = new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "long",
+  }).format(new Date(date));
+
+  return formattedDate;
+};
+
+export function formatTime(timeString: string | null) {
+  if (!timeString) {
+    return null;
+  }
+
+  const [hours, minutes] = timeString.split(":");
+  return `${hours}:${minutes}`;
 }
