@@ -9,33 +9,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDate } from "@/lib/utils";
 import { Check, ClipboardCopy } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 const InvitationLinkGenerator: React.FC = () => {
+  const [selectedInvitation, setSelectedInvitation] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [domLoaded, setDomLoaded] = useState<boolean>(false);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [guests, setGuests] = useState<any[]>([]);
-  const [selectedInvitation, setSelectedInvitation] = useState<string>("");
-  const [generatedMessages, setGeneratedMessages] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [copySuccess, setCopySuccess] = useState<string>("");
-  const [domLoaded, setDomLoaded] = useState<boolean>(false);
-  const [copied, setCopied] = useState(false);
   const [indexCopied, setIndexCopied] = useState<number | null>(null);
-
-  const handleCopy = (template: string, index: number) => {
-    copyToClipboard(template);
-    setIndexCopied(index);
-    setCopied(true);
-
-    // Reset icon setelah 3 detik
-    setTimeout(() => {
-      setIndexCopied(null);
-    }, 3000);
-
-    setTimeout(() => setCopied(false), 1500); // Reset after 1.5s
-  };
+  const [generatedMessages, setGeneratedMessages] = useState<
+    {
+      to: string;
+      template: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const fetchInvitations = async () => {
@@ -55,7 +46,6 @@ const InvitationLinkGenerator: React.FC = () => {
 
     setDomLoaded(true);
   }, []);
-
   const handleInvitationChange = async (invitationId: string) => {
     setSelectedInvitation(invitationId);
     setLoading(true);
@@ -64,7 +54,6 @@ const InvitationLinkGenerator: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("response guests: ", data);
         setGuests(data.data);
       } else {
         console.error("Failed to fetch guests");
@@ -75,7 +64,6 @@ const InvitationLinkGenerator: React.FC = () => {
       setLoading(false);
     }
   };
-
   const generateLinks = async () => {
     setLoading(true);
     try {
@@ -84,7 +72,6 @@ const InvitationLinkGenerator: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           invitation_id: selectedInvitation,
         }),
@@ -94,20 +81,20 @@ const InvitationLinkGenerator: React.FC = () => {
         const result = await response.json();
         setGeneratedMessages(result.data);
       } else {
-        console.error("Error generating links");
+        console.error("Error generating messages");
       }
       setLoading(false);
     } catch (error) {
-      console.error("Error generating links:", error);
+      console.error("Error generating messages: ", error);
       setLoading(false);
     }
   };
-
-  const copyToClipboard = (link: string) => {
-    navigator.clipboard.writeText(link).then(
-      () => setCopySuccess("Copied!"),
-      () => setCopySuccess("Failed to copy link")
-    );
+  const handleCopy = (template: string, index: number) => {
+    navigator.clipboard.writeText(template);
+    setIndexCopied(index);
+    setTimeout(() => {
+      setIndexCopied(null);
+    }, 3000);
   };
 
   return (
@@ -123,7 +110,7 @@ const InvitationLinkGenerator: React.FC = () => {
           href="/upload-guest"
           className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition"
         >
-          ⬅️ Upload Guest List
+          ➡️ Upload Guests
         </Link>
       </div>
       <div className="mx-auto relative w-full max-w-xl">
@@ -146,7 +133,8 @@ const InvitationLinkGenerator: React.FC = () => {
                   <SelectItem value="default">Select Invitation</SelectItem>
                   {invitations.map((invitation) => (
                     <SelectItem key={invitation.id} value={invitation.id}>
-                      {invitation.event_title} ({invitation.event_date})
+                      {invitation.event_title} - (
+                      {formatDate(invitation.event_date)})
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -162,7 +150,7 @@ const InvitationLinkGenerator: React.FC = () => {
             {loading ? "Loading..." : "Generate Messages"}
           </button>
 
-          {domLoaded && <Meteors number={30} />}
+          {domLoaded && <Meteors number={24} />}
         </div>
       </div>
 
@@ -172,7 +160,8 @@ const InvitationLinkGenerator: React.FC = () => {
             <div className="absolute inset-0 h-full w-full scale-[0.80] transform rounded-full bg-red-500 bg-gradient-to-r from-blue-500 to-teal-500 blur-3xl" />
             <div className="relative flex h-full flex-col items-start justify-end overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 px-4 py-8 shadow-xl">
               <h1 className="relative z-50 mb-1 text-xl font-bold text-white">
-                Your Invitation Messages! 💕
+                Your Invitation Messages{" "}
+                {guests.length > 0 ? `for ${guests.length} Guest(s)! ` : ""} 💕
               </h1>
               <p className="text-slate-400 text-xs mb-10">
                 This list of invitation messages is temporary, if the browser is
