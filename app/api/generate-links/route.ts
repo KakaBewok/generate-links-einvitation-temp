@@ -84,6 +84,7 @@ ${link}
 
 Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir di acara kami
 Mohon maaf perihal undangan hanya dibagikan melalui pesan ini
+
 Terima kasih banyak atas perhatiannya 💕
 
                           `;
