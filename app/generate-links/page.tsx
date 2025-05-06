@@ -133,8 +133,8 @@ const InvitationLinkGenerator: React.FC = () => {
                   <SelectItem value="default">Select Invitation</SelectItem>
                   {invitations.map((invitation) => (
                     <SelectItem key={invitation.id} value={invitation.id}>
-                      {invitation.event_title} - (
-                      {formatDate(invitation.event_date)})
+                      {invitation.event_title} -{" "}
+                      {formatDate(invitation.event_date)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
