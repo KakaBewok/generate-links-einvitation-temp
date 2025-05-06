@@ -39,14 +39,12 @@ interface Data {
 }
 
 interface User {
-  id: number;
   name: string;
   email: string;
   password: string;
 }
 
 interface Theme {
-  id: number;
   name: string;
   preview_image: string;
   is_active: boolean;
@@ -54,14 +52,12 @@ interface Theme {
 }
 
 interface Music {
-  id: number;
   title: string;
   artist: string;
   url: string;
 }
 
 interface Video {
-  id: number;
   invitation_id: number;
   title: string;
   description: string;
@@ -71,7 +67,6 @@ interface Video {
 }
 
 interface Image {
-  id: number;
   invitation_id: number;
   url: string;
   caption: string;
@@ -79,7 +74,6 @@ interface Image {
 }
 
 interface GiftInfo {
-  id: number;
   invitation_id: number;
   provider_name: string;
   account_number: string;
@@ -87,20 +81,18 @@ interface GiftInfo {
   gift_delivery_address: string;
 }
 
-interface Guest {
-  id: number;
+export interface Guest {
   invitation_id: number;
   name: string;
-  phone_number: string;
-  slug: string;
-  is_attending: boolean;
-  total_guest: number;
-  notes: string;
-  address: string;
+  phone_number?: string;
+  slug?: string;
+  is_attending?: boolean;
+  total_guest?: number;
+  notes?: string;
+  address?: string;
 }
 
 interface Rundown {
-  id: number;
   invitation_id: number;
   title: string;
   location: string;
@@ -115,7 +107,6 @@ interface Rundown {
 }
 
 interface Story {
-  id: number;
   invitation_id: number;
   title: string;
   content: string;
@@ -125,7 +116,6 @@ interface Story {
 }
 
 interface RSVP {
-  id: number;
   invitation_id: number;
   guest_name: string;
   message: string;

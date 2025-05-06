@@ -67,7 +67,7 @@ export default function UploadGuestPage() {
           href="/generate-links"
           className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg shadow hover:bg-gray-200 transition"
         >
-          ⬅️ Generate Invitation
+          ➡️ Generate Message
         </Link>
       </div>
       <div className="px-5 py-4 w-full max-w-3xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-500 dark:border-neutral-800 rounded-lg">

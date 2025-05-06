@@ -92,7 +92,6 @@ const InvitationLinkGenerator: React.FC = () => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("ini response gen links", result.data);
         setGeneratedMessages(result.data);
       } else {
         console.error("Error generating links");

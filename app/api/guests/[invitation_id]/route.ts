@@ -19,6 +19,7 @@ export async function GET(
 
     return NextResponse.json({ data: data }, { status: 200 });
   } catch (error) {
+    console.error("Error fetching guest data: ", error);
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }

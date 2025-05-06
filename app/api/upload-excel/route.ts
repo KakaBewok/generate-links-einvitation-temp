@@ -1,5 +1,5 @@
 import db from "@/config/db-config";
-import { GuestData } from "@/types/guest-data";
+import { Guest } from "@/types/data";
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 
@@ -12,22 +12,22 @@ export const config = {
 };
 
 // --- Helper functions ---
-async function parseExcelFile(file: File): Promise<GuestData[]> {
+async function parseExcelFile(file: File): Promise<Guest[]> {
   const arrayBuffer = await file.arrayBuffer();
   const workbook = XLSX.read(arrayBuffer, { type: "buffer" });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json<GuestData>(sheet);
+  const data = XLSX.utils.sheet_to_json<Guest>(sheet);
   return data;
 }
 
 // Function to validate the guest data
 // to ensure all required fields are present
-function validateGuestData(item: GuestData): boolean {
-  return !!(item.invitation_id && item.guest_name);
+function validateGuestData(item: Guest): boolean {
+  return !!(item.invitation_id && item.name);
 }
 
-async function findInvitationId(invitationId: string): Promise<string> {
+async function findInvitationId(invitationId: number): Promise<number> {
   const { data, error } = await db
     .from("invitations")
     .select("id")
@@ -42,7 +42,7 @@ async function findInvitationId(invitationId: string): Promise<string> {
 }
 
 // Function to upsert guest data into the database
-const upsertGuestsToDB = async (guests: GuestData[]) => {
+const upsertGuestsToDB = async (guests: Guest[]) => {
   const { data, error } = await db.from("guests").upsert(guests);
   if (error) {
     console.error("Error saving guest data to database:", error.message);
@@ -65,9 +65,8 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await parseExcelFile(file);
-    console.log("Parsed Excel Data:", data);
 
-    const guests: GuestData[] = [];
+    const guests: Guest[] = [];
 
     for (const item of data) {
       if (!validateGuestData(item)) {
@@ -77,9 +76,7 @@ export async function POST(request: NextRequest) {
       const invitationId = await findInvitationId(item.invitation_id);
 
       guests.push({
-        guest_name: item.guest_name,
-        phone_number: item.phone_number,
-        address: item.address,
+        name: item.name,
         invitation_id: invitationId,
       });
     }
