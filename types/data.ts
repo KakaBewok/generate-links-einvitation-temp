@@ -82,7 +82,7 @@ interface GiftInfo {
 }
 
 export interface Guest {
-  id?: number | null;
+  id?: number;
   invitation_id: number;
   name: string;
   phone_number?: string;
