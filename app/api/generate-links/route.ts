@@ -57,11 +57,12 @@ export async function POST(request: NextRequest) {
 }
 
 const createTemplateMessage = (data: Data, guest: Guest) => {
-  const sanitizedGuestName = encodeURIComponent(guest.name).replace(
-    /%20/g,
-    "+"
-  );
-  const link = `${data.web_url}/${data.slug}?to=${sanitizedGuestName}`;
+  // const sanitizedGuestName = encodeURIComponent(guest.name).replace(
+  //   /%20/g,
+  //   "+"
+  // );
+  // const link = `${data.web_url}/${data.slug}?to=${sanitizedGuestName}&id=${guest.id}`;
+  const link = `${data.web_url}/${data.slug}?inv_id=${data.id}&guest_id=${guest.id}`;
 
   const template = `
 Yth. Bapak/Ibu/Saudara/i
