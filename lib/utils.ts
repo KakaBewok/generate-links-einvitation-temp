@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import Hashids from "hashids";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -22,4 +23,14 @@ export function formatTime(timeString: string | null) {
 
   const [hours, minutes] = timeString.split(":");
   return `${hours}:${minutes}`;
+}
+
+export function encode(ids: number[]) {
+  const hashids = new Hashids("coyuli", 5);
+  return hashids.encode(ids);
+}
+
+export function decode(hash: string) {
+  const hashids = new Hashids("coyuli", 5);
+  return hashids.decode(hash);
 }

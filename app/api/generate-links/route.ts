@@ -1,5 +1,5 @@
 import db from "@/config/db-config";
-import { formatDate, formatTime } from "@/lib/utils";
+import { encode, formatDate, formatTime } from "@/lib/utils";
 import Data, { Guest } from "@/types/data";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -57,12 +57,8 @@ export async function POST(request: NextRequest) {
 }
 
 const createTemplateMessage = (data: Data, guest: Guest) => {
-  // const sanitizedGuestName = encodeURIComponent(guest.name).replace(
-  //   /%20/g,
-  //   "+"
-  // );
-  // const link = `${data.web_url}/${data.slug}?to=${sanitizedGuestName}&id=${guest.id}`;
-  const link = `${data.web_url}/${data.slug}?inv_id=${data.id}&guest_id=${guest.id}`;
+  const token = encode([data.id, guest.id!]);
+  const link = `${data.web_url}/${data.slug}?id=${token}`;
 
   const template = `
 Yth. Bapak/Ibu/Saudara/i
@@ -87,7 +83,6 @@ Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk
 Mohon maaf perihal undangan hanya dibagikan melalui pesan ini
 
 Terima kasih banyak atas perhatiannya 💕
-
                           `;
 
   return {
