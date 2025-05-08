@@ -113,13 +113,13 @@ const InvitationLinkGenerator: React.FC = () => {
           ➡️ Upload Guests
         </Link>
       </div>
+      {/* <ManualGuestInput /> */}
       <div className="mx-auto relative w-full max-w-xl">
         <div className="absolute inset-0 h-full w-full scale-[0.80] transform rounded-full bg-red-500 bg-gradient-to-r from-blue-500 to-teal-500 blur-2xl" />
         <div className="relative flex h-full flex-col items-start justify-end overflow-hidden rounded-2xl border border-gray-800 bg-gray-900 px-4 py-8 shadow-xl">
           <h1 className="relative z-50 mb-4 text-xl font-bold text-white">
             Generate Invitation Messages
           </h1>
-
           <div className="mb-5 w-full text-white bg-slate-800">
             <Select
               value={selectedInvitation ?? ""}
